@@ -1,0 +1,66 @@
+const int stepX1 = 2;
+const int dirX1  = 5;
+const int stepX2 = 3;
+const int dirX2  = 6;
+const int enPin = 8;
+
+const int stepsPerMove = 10;
+const int stepDelay = 100; // in microseconds
+
+void setup() {
+  pinMode(stepX1, OUTPUT);
+  pinMode(dirX1, OUTPUT);
+  pinMode(stepX2, OUTPUT);
+  pinMode(dirX2, OUTPUT);
+  pinMode(enPin, OUTPUT);
+
+  digitalWrite(enPin, LOW); // Enable drivers
+  Serial.begin(9600);       // Start serial communication
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    char command = Serial.read();
+    if (command == 'X') {
+      moveX(true);
+    } else if (command == 'x') {
+      moveX(false);
+    } else if (command == 'Y') {
+      moveY(true);
+    } else if (command == 'y') {
+      moveY(false);
+    }
+  }
+}
+
+void moveX(bool forward) {
+  digitalWrite(dirX1, forward ? HIGH : LOW);
+  digitalWrite(dirX2, forward ? HIGH : LOW);
+
+  for (int i = 0; i < stepsPerMove; i++) {
+    digitalWrite(stepX1, HIGH);
+    digitalWrite(stepX2, HIGH);
+    delayMicroseconds(stepDelay);
+    digitalWrite(stepX1, LOW);
+    digitalWrite(stepX2, LOW);
+    delayMicroseconds(stepDelay);
+  }
+
+  Serial.println("DONE");  // Signaal naar Python dat beweging klaar is
+}
+
+void moveY(bool forward) {
+  digitalWrite(dirX1, forward ? HIGH : LOW);
+  digitalWrite(dirX2, forward ? LOW : HIGH); // tegenovergestelde richting als nodig
+
+  for (int i = 0; i < stepsPerMove; i++) {
+    digitalWrite(stepX1, HIGH);
+    digitalWrite(stepX2, HIGH);
+    delayMicroseconds(stepDelay);
+    digitalWrite(stepX1, LOW);
+    digitalWrite(stepX2, LOW);
+    delayMicroseconds(stepDelay);
+  }
+
+  Serial.println("DONE"); // Signaal naar Python
+}
